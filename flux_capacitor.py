@@ -6,6 +6,8 @@ Inspired by Back to the Future
 "Roads? Where we're going, we don't need roads." - Doc Brown
 """
 
+import random
+
 # The magic number - 1.21 gigawatts!
 GIGAWATTS_REQUIRED = 1.21
 
@@ -54,7 +56,6 @@ def get_time_travel_quote() -> str:
         'you\'re gonna see some serious stuff." - Doc Brown',
         '"Nobody calls me chicken." - Marty McFly',
     ]
-    import random
 
     return random.choice(quotes)
 
