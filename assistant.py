@@ -48,7 +48,18 @@ def parse_due_date(value: Optional[str]) -> Optional[datetime]:
     try:
         return datetime.fromisoformat(value)
     except ValueError:
+        print(f"Warning: ignoring invalid due date '{value}'.")
         return None
+
+
+def normalize_due_date(value: str) -> str:
+    try:
+        datetime.fromisoformat(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(
+            "Due date must be in ISO format (YYYY-MM-DD)."
+        ) from exc
+    return value
 
 
 def format_task(task: Dict[str, Any]) -> str:
@@ -97,8 +108,8 @@ def summarize(data: Dict[str, List[Dict[str, Any]]]) -> None:
         for task in pending
         if task.get("due")
     ]
-    due_candidates = [(due, task) for due, task in due_candidates if due]
-    next_due = min(due_candidates, default=(None, None))[1]
+    valid_due_candidates = [(due, task) for due, task in due_candidates if due]
+    next_due = min(valid_due_candidates, default=(None, None))[1]
 
     print("Personal Assistant Summary")
     print("--------------------------")
@@ -124,7 +135,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     add_task = subparsers.add_parser("add-task", help="Add a new task.")
     add_task.add_argument("description", help="Task description.")
-    add_task.add_argument("--due", help="Due date in ISO format (YYYY-MM-DD).")
+    add_task.add_argument(
+        "--due",
+        type=normalize_due_date,
+        help="Due date in ISO format (YYYY-MM-DD).",
+    )
     add_task.add_argument(
         "--priority",
         choices=["low", "medium", "high"],
